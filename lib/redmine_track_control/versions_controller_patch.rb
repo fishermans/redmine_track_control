@@ -26,6 +26,9 @@ module RedmineTrackControl
             @trackers = @trackers.compact.reject(&:blank?).uniq.sort
             retrieve_selected_tracker_ids(@trackers, @trackers.select {|t| t.is_in_roadmap?})                     
           }
+          format.api {
+            @versions = @project.shared_versions.all
+          }
         end    
       end
     end

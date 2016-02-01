@@ -17,11 +17,19 @@ module RedmineTrackControl
     # Gets the list of valid trackers for the project for the current user
     def self.valid_trackers_list(project, permtype='create')
       if project
-        if project.enabled_modules.where(:name => "tracker_permissions").count == 1
-          project.trackers.select{|t| User.current.allowed_to?(permission(t,permtype), project, :global => true)}.collect {|t| [t.name, t.id]}
-        else
-          project.trackers.collect {|t| [t.name, t.id]}
+        ltrackers = project.trackers
+        if permtype == 'show' and Setting.display_subprojects_issues?
+          if ltrackers.empty?
+            ltrackers = project.rolled_up_trackers
+          end
         end
+        if project.enabled_modules.where(:name => "tracker_permissions").count == 1
+          ltrackers.select{|t| User.current.allowed_to?(permission(t,permtype), project, :global => true)}.collect {|t| [t.name, t.id]}
+        else
+          ltrackers.collect {|t| [t.name, t.id]}
+        end
+      else
+        Tracker.all.collect {|t| t.id}
       end
     end
     
@@ -37,11 +45,19 @@ module RedmineTrackControl
     # Gets the list of valid trackers for the project for the current user
     def self.valid_trackers_ids(project, permtype='create', usr=nil)
       if project
-        if project.enabled_modules.where(:name => "tracker_permissions").count == 1
-          project.trackers.select{|t| (usr || User.current).allowed_to?(permission(t,permtype), project, :global => true)}.map {|t| t.id}
-        else
-          project.trackers.collect {|t| t.id}
+        ltrackers = project.trackers
+        if permtype == 'show' and Setting.display_subprojects_issues?
+          if ltrackers.empty?
+            ltrackers = project.rolled_up_trackers
+          end
         end
+        if project.enabled_modules.where(:name => "tracker_permissions").count == 1
+          ltrackers.select{|t| (usr || User.current).allowed_to?(permission(t,permtype), project, :global => true)}.map {|t| t.id}
+        else
+          ltrackers.collect {|t| t.id}
+        end
+      else
+        Tracker.all.collect {|t| t.id}
       end
     end           
     

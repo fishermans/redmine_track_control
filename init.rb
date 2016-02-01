@@ -13,7 +13,7 @@ ActionDispatch::Callbacks.to_prepare do
 
   require_dependency 'issues_controller'
   IssuesController.send(:include, RedmineTrackControl::IssuesControllerPatch)
-  
+
   require_dependency 'query'
   IssueQuery.send(:include, RedmineTrackControl::QueryPatch)
 
@@ -23,22 +23,24 @@ ActionDispatch::Callbacks.to_prepare do
   require_dependency 'versions_controller'
   VersionsController.send(:include, RedmineTrackControl::VersionsControllerPatch)
 
-  
-  require_dependency 'redmine_track_control/hooks'  
+
+  require_dependency 'redmine_track_control/hooks'
 end
 
 Redmine::Plugin.register :redmine_track_control do
   name 'Redmine Tracker Control plugin'
-  author 'Jijesh Mohan'
-  description 'Plugin for controlling tracker wise issue creation'
-  version '2.0.0'
+  author 'Jijesh Mohan refactored by Tiemo Vorschuetz'
+  description 'Plugin for controlling tracker wise issue creation. Code improved and refactored based on "Redmine tracker accessible" from https://github.com/twinslash/redmine_tracker_accessible'
+  version '2.0.1'
   url 'https://github.com/jijeshmohan/redmine_track_control'
   author_url 'jijeshmohan.wordpress.com'
 
   project_module :tracker_permissions do
-    Tracker.all.each do |t|
-      RedmineTrackControl::TrackerHelper.add_tracker_permission(t,"create")
-      RedmineTrackControl::TrackerHelper.add_tracker_permission(t,"show")
+    if ActiveRecord::Base.connection.table_exists? Tracker.table_name
+      Tracker.all.each do |t|
+        RedmineTrackControl::TrackerHelper.add_tracker_permission(t,"create")
+        RedmineTrackControl::TrackerHelper.add_tracker_permission(t,"show")
+      end
     end
   end
 end
