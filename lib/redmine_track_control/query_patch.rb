@@ -14,8 +14,12 @@ module RedmineTrackControl
     end
 
     module InstanceMethods
-      def trackers_with_trackcontrol       
-        @trackers ||= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids(project,"show")).order("#{Tracker.table_name}.position")
+      def trackers_with_trackcontrol  
+        @trackers = []
+        project.children.visible.to_a.each do |prj|
+          @trackers |= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids(prj, "show")).order("#{Tracker.table_name}.position")              
+        end             
+        @trackers = @trackers.compact.reject(&:blank?).uniq.sort  
       end
     end
   end

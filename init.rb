@@ -23,6 +23,8 @@ ActionDispatch::Callbacks.to_prepare do
   require_dependency 'versions_controller'
   VersionsController.send(:include, RedmineTrackControl::VersionsControllerPatch)
 
+  require_dependency 'projects_controller'
+  ProjectsController.send(:include, RedmineTrackControl::ProjectsControllerPatch)  
 
   require_dependency 'redmine_track_control/hooks'
 end
