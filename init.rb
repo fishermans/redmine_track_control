@@ -33,9 +33,9 @@ Redmine::Plugin.register :redmine_track_control do
   name 'Redmine Tracker Control plugin'
   author 'Jijesh Mohan refactored by Tiemo Vorschuetz'
   description 'Plugin for controlling tracker wise issue creation. Code improved and refactored based on "Redmine tracker accessible" from https://github.com/twinslash/redmine_tracker_accessible'
-  version '2.0.1'
-  url 'https://github.com/jijeshmohan/redmine_track_control'
-  author_url 'jijeshmohan.wordpress.com'
+  version '3.0.0'
+   requires_redmine :version_or_higher => '3.2.0'
+  url 'https://github.com/fishermans/redmine_track_control'
 
   project_module :tracker_permissions do
     if ActiveRecord::Base.connection.table_exists? Tracker.table_name
