@@ -8,6 +8,7 @@ Plugin for controlling tracker wise issue creation
 * Role based permission to view issues
 * Project Module to enable/disable tracker permission
 * Projects which are not enabled tracker control module , will work normally
+* Compatible with Redmine 3.2.x
 
 *Installation*
 
