@@ -14,7 +14,7 @@ module RedmineTrackControl
     end
 
     module InstanceMethods
-      def issues_with_trackcontrol       
+      def issues_with_trackcontrol          
         if (@issues.size == 1)
           @issue = @issues.first
         end

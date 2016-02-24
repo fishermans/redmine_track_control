@@ -43,7 +43,7 @@ module RedmineTrackControl
         end
 
         # patch for visible_condition_block
-        def self.visible_condition_block_with_trackcontrol(role, user)          
+        def self.visible_condition_block_with_trackcontrol(role, user) 
           if user.logged?
             # prepend extra access condition
             condition = [extra_access_conditions(role)]
@@ -74,20 +74,39 @@ module RedmineTrackControl
         end
 
         # user should see issues if he has an extra access
+        # def self.extra_access_conditions(role)
+        #   tracker_ids = RedmineTrackControl::TrackerHelper.trackers_ids_by_role(role,"show")
+        #   if (!tracker_ids.empty?)
+        #     "((#{table_name}.tracker_id IN (#{tracker_ids.join(',')})) OR #{table_name}.project_id NOT IN (SELECT em.project_id FROM #{EnabledModule.table_name} em WHERE em.name='tracker_permissions'))"
+        #   end
+        # end
+        
+        
         def self.extra_access_conditions(role)
           tracker_ids = RedmineTrackControl::TrackerHelper.trackers_ids_by_role(role,"show")
           if (!tracker_ids.empty?)
-            "((#{table_name}.tracker_id IN (#{tracker_ids.join(',')})) OR #{table_name}.project_id NOT IN (SELECT em.project_id FROM #{EnabledModule.table_name} em WHERE em.name='tracker_permissions'))"
+            case role.issues_visibility
+            when 'all'
+              "1=1"
+            when 'default'
+              "((#{table_name}.tracker_id IN (#{tracker_ids.join(',')})) OR #{table_name}.project_id NOT IN (SELECT em.project_id FROM #{EnabledModule.table_name} em WHERE em.name='tracker_permissions'))"
+            else
+              ""
+            end
           end
-        end
+        end        
         
       end
     end     
        
 
     module InstanceMethods
-      def visible_with_trackcontrol?(usr=nil)        
-        visible_without_trackcontrol?(usr) && (RedmineTrackControl::TrackerHelper.issue_has_valid_tracker?(self,"show", usr) || (usr || User.current).admin?)
+      def visible_with_trackcontrol?(usr=nil) 
+        if RedmineTrackControl::TrackerHelper.is_trackcontrol_enabled (self.project)
+          visible_without_trackcontrol?(usr) && (RedmineTrackControl::TrackerHelper.issue_has_valid_tracker?(self,"show", usr) || (usr || User.current).admin?)
+        else
+          visible_without_trackcontrol?(usr)
+        end 
       end
           
   
@@ -98,6 +117,7 @@ module RedmineTrackControl
       
       def is_valid_show_tracker
         errors.add(:tracker_id, :invalid) if RedmineTrackControl::TrackerHelper.valid_trackers_list(self.project,"show").empty?
-      end    end
+      end    
+    end
   end
 end

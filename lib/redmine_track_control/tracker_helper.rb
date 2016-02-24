@@ -1,6 +1,14 @@
 # Helper module
 module RedmineTrackControl
   module TrackerHelper
+    def self.is_trackcontrol_enabled(project)
+      if project
+        project.enabled_modules.where(:name => "tracker_permissions").count == 1
+      else
+        false
+      end
+    end
+    
     def self.add_tracker_permission(tracker, permtype)
       Redmine::AccessControl.map {|map| map.project_module(:tracker_permissions) {|map|map.permission(permission(tracker,permtype), {:issues => :index}, {})}}
     end
@@ -23,13 +31,13 @@ module RedmineTrackControl
             ltrackers = project.rolled_up_trackers
           end
         end
-        if project.enabled_modules.where(:name => "tracker_permissions").count == 1
+        if is_trackcontrol_enabled (project)
           ltrackers.select{|t| User.current.allowed_to?(permission(t,permtype), project, :global => true)}.collect {|t| [t.name, t.id]}
         else
           ltrackers.collect {|t| [t.name, t.id]}
         end
       else
-        Tracker.all.collect {|t| t.id}
+        Tracker.all.collect {|t| [t.name, t.id]}
       end
     end
     
@@ -41,21 +49,39 @@ module RedmineTrackControl
         Tracker.all.collect {|t| t.id}
       end
     end
-           
+    
     # Gets the list of valid trackers for the project for the current user
     def self.valid_trackers_ids(project, permtype='create', usr=nil)
-      if project
-        ltrackers = project.trackers
-        if permtype == 'show' and Setting.display_subprojects_issues?
-          if ltrackers.empty?
-            ltrackers = project.rolled_up_trackers
+      if project       
+        ltrackers = project.trackers.to_a
+        ltrackers |= project.rolled_up_trackers if permtype == 'show' and Setting.display_subprojects_issues?
+        if is_trackcontrol_enabled(project)
+          ltrackers.select{|t| (usr || User.current).allowed_to?(permission(t,permtype), project, :global => true)}.collect {|t| t.id}.uniq.sort
+        else
+          ltrackers.collect {|t| t.id}.uniq.sort
+        end
+      else
+        Tracker.all.collect {|t| t.id}
+      end
+    end    
+           
+    # Gets the list of valid trackers for the project for the current user
+    def self.valid_trackers_ids_incl_assigned_to(project, permtype='create', usr=nil)
+      if project       
+        ltrackers = []        
+        if is_trackcontrol_enabled (project)
+          unless project.issues.nil? and permtype == ''
+            visible_issues ||= project.issues.to_a
+            visible_issues.each do |iss|  
+              if iss.visible?(usr || User.current)
+                ltrackers.push(iss.tracker) unless ltrackers.include?(iss.tracker)
+              end
+            end
           end
         end
-        if project.enabled_modules.where(:name => "tracker_permissions").count == 1
-          ltrackers.select{|t| (usr || User.current).allowed_to?(permission(t,permtype), project, :global => true)}.map {|t| t.id}
-        else
-          ltrackers.collect {|t| t.id}
-        end
+        prj_related_trackers = ltrackers.collect {|t| t.id}
+        general_prj_trackers = valid_trackers_ids(project, permtype, usr)
+        (prj_related_trackers + general_prj_trackers).uniq.sort;
       else
         Tracker.all.collect {|t| t.id}
       end
@@ -65,9 +91,11 @@ module RedmineTrackControl
     def self.issue_has_valid_tracker?(issue, permtype='create', usr=nil)
       if issue
         unless issue.project.nil?
-          if issue.project.enabled_modules.where(:name => "tracker_permissions").count == 1
+          if is_trackcontrol_enabled (issue.project)
             l_trackers = valid_trackers_ids(issue.project,permtype,usr)
             return !l_trackers.nil? && !l_trackers.empty? && (l_trackers.include?(issue.tracker.id) || (issue.author == (usr || User.current)) ||  (usr || User.current).is_or_belongs_to?(issue.assigned_to))
+          else
+            issue.project.trackers.count > 0
           end
         end
       end

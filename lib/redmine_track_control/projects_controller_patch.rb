@@ -14,7 +14,7 @@ module RedmineTrackControl
     end
 
     module InstanceMethods
-      def show_with_trackcontrol
+      def show_with_trackcontrol        
         # try to redirect to the requested menu item
         if params[:jump] && redirect_to_project_menu_item(@project, params[:jump])
           return
@@ -24,9 +24,9 @@ module RedmineTrackControl
         @subprojects = @project.children.visible.to_a
         @news = @project.news.limit(5).includes(:author, :project).reorder("#{News.table_name}.created_on DESC").to_a
         
-        @trackers = []
+        @trackers = Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids_incl_assigned_to(@project, "show")).order("#{Tracker.table_name}.position").to_a
         @subprojects.each do |prj|
-          @trackers |= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids(prj, "show")).order("#{Tracker.table_name}.position")              
+          @trackers |= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids_incl_assigned_to(prj, "show")).order("#{Tracker.table_name}.position").to_a              
         end             
         @trackers = @trackers.compact.reject(&:blank?).uniq.sort    
     

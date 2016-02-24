@@ -18,9 +18,11 @@ module RedmineTrackControl
 
       # nullify tracker_id if it is not allowed
       def check_tracker_id_with_trackcontrol
-        tracker_ids = allowed_tracker_ids_with_trackcontrol
-        if @issue.tracker_id_changed? && tracker_ids.exclude?(@issue.tracker_id)
-          @issue.tracker_id = nil
+        if RedmineTrackControl::TrackerHelper.is_trackcontrol_enabled(@issue.project)
+          tracker_ids = allowed_tracker_ids_with_trackcontrol
+          if @issue.tracker_id_changed? && tracker_ids.exclude?(@issue.tracker_id)
+            @issue.tracker_id = nil
+          end
         end
       end
 
@@ -53,7 +55,7 @@ module RedmineTrackControl
       
       # join trackers from permissions
       def get_tracker_ids(permtype="create")
-        @tracker_ids = RedmineTrackControl::TrackerHelper.valid_trackers_ids(@project,permtype)
+        @tracker_ids = RedmineTrackControl::TrackerHelper.valid_trackers_ids_incl_assigned_to(@project,permtype)
         @tracker_ids.flatten.uniq
       end      
 
