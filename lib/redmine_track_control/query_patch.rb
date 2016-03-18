@@ -19,7 +19,6 @@ module RedmineTrackControl
 
     module InstanceMethods
       def trackers_with_trackcontrol  
-<<<<<<< HEAD
         if project.nil? || !RedmineTrackControl::TrackerHelper.is_trackcontrol_enabled(project)
           trackers_without_trackcontrol
         else
@@ -32,18 +31,6 @@ module RedmineTrackControl
             @trackers |= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids_incl_assigned_to(prj, "show")).order("#{Tracker.table_name}.position")              
           end             
           @trackers = @trackers.compact.reject(&:blank?).uniq.sort  
-=======
-        unless project.nil?
-          @trackers = []
-          if project.children.nil?
-            @trackers ||= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids(project,"show")).order("#{Tracker.table_name}.position")
-          else
-            project.children.visible.to_a.each do |prj|
-              @trackers |= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids(prj, "show")).order("#{Tracker.table_name}.position")              
-            end             
-            @trackers = @trackers.compact.reject(&:blank?).uniq.sort  
-          end
->>>>>>> a1ec1b7f18d636297c90e5bf5266c27c071d75de
         end
       end
     end
