@@ -53,7 +53,7 @@ module RedmineTrackControl
       
       # join trackers from permissions
       def get_tracker_ids(permtype="create")
-        @tracker_ids = RedmineTrackControl::TrackerHelper.valid_trackers_ids_incl_assigned_to(@project,permtype)
+        @tracker_ids = RedmineTrackControl::TrackerHelper.valid_trackers_ids(@project,permtype)
         @tracker_ids.flatten.uniq
       end      
 
