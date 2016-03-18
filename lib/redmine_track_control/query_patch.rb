@@ -13,21 +13,13 @@ module RedmineTrackControl
       end
     end
     
-    #      def trackers
-    #    @trackers ||= project.nil? ? Tracker.sorted.to_a : project.rolled_up_trackers
-    #  end
-
     module InstanceMethods
       def trackers_with_trackcontrol  
-        if project.nil? || !RedmineTrackControl::TrackerHelper.is_trackcontrol_enabled(project)
-          trackers_without_trackcontrol
+        if project.nil?
+          @trackers = Tracker.sorted.to_a
         else
-          all_prjs = [project] 
-          if !project.children.nil?
-            all_prjs |= project.children.visible.to_a
-          end
           @trackers = []
-          all_prjs.each do |prj|
+          project.self_and_descendants.each do |prj|
             @trackers |= Tracker.where(:id => RedmineTrackControl::TrackerHelper.valid_trackers_ids_incl_assigned_to(prj, "show")).order("#{Tracker.table_name}.position")              
           end             
           @trackers = @trackers.compact.reject(&:blank?).uniq.sort  

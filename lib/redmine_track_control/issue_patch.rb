@@ -102,11 +102,7 @@ module RedmineTrackControl
 
     module InstanceMethods
       def visible_with_trackcontrol?(usr=nil) 
-        if RedmineTrackControl::TrackerHelper.is_trackcontrol_enabled (self.project)
           visible_without_trackcontrol?(usr) && (RedmineTrackControl::TrackerHelper.issue_has_valid_tracker?(self,"show", usr) || (usr || User.current).admin?)
-        else
-          visible_without_trackcontrol?(usr)
-        end 
       end
           
   

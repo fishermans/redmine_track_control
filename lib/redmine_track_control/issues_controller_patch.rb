@@ -18,12 +18,10 @@ module RedmineTrackControl
 
       # nullify tracker_id if it is not allowed
       def check_tracker_id_with_trackcontrol
-        if RedmineTrackControl::TrackerHelper.is_trackcontrol_enabled(@issue.project)
           tracker_ids = allowed_tracker_ids_with_trackcontrol
           if @issue.tracker_id_changed? && tracker_ids.exclude?(@issue.tracker_id)
             @issue.tracker_id = nil
           end
-        end
       end
 
       # build possible trackers for issue.
