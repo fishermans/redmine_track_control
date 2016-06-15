@@ -1,0 +1,7 @@
+# Simplified Chinese strings go here for Rails i18n
+zh:
+  trackcontrol_create_tracker: "创建跟踪类型为 %{value} 的问题"
+  trackcontrol_show_tracker: "显示跟踪类型为 %{value} 的问题"  
+  notice_no_valid_trackers_available: "当前跟踪类型不存在。请联系UTH_Redmine管理员咨询相关问题。"
+  trackcontrol_tracker_not_allowed: "跟踪类型不允许使用！"
+  error_no_tracker_in_project: "当前项目中不存在该跟踪类型！"
