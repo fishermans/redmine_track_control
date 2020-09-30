@@ -1,7 +1,7 @@
 require 'redmine'
 require 'redmine_track_control/tracker_helper'
 
-ActionDispatch::Callbacks.to_prepare do
+Rails.configuration.to_prepare do
   require_dependency 'tracker'
   Tracker.send(:include, RedmineTrackControl::TrackerPatch)
 

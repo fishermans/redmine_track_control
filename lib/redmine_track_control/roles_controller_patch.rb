@@ -8,7 +8,11 @@ module RedmineTrackControl
       
       base.class_eval do
         unloadable
-        before_filter :store_translations
+        if Rails::VERSION::MAJOR >= 5
+          before_action :store_translations
+        else
+          before_filter :store_translations
+        end
       end
     end
 

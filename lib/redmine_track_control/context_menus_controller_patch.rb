@@ -9,7 +9,13 @@ module RedmineTrackControl
       base.class_eval do
         unloadable # Send unloadable so it will not be unloaded in development
 
-        alias_method_chain :issues, :trackcontrol
+        if Rails::VERSION::MAJOR >= 5
+          alias_method :issues_without_trackcontrol, :issues
+          alias_method :issues, :issues_with_trackcontrol
+        else
+          alias_method_chain :issues, :trackcontrol
+        end
+
       end
     end
 

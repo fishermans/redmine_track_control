@@ -7,10 +7,19 @@ module RedmineTrackControl
       base.send(:include, InstanceMethods)
 
       base.class_eval do
-        before_filter :check_tracker_id_with_trackcontrol, :only => [:new, :create, :update]
-        alias_method_chain :build_new_issue_from_params, :trackcontrol
-        alias_method_chain :update_issue_from_params, :trackcontrol
+        
+        if Rails::VERSION::MAJOR >= 5
+          before_action :check_tracker_id_with_trackcontrol, :only => [:new, :create, :update]
+          alias_method :build_new_issue_from_params_without_trackcontrol, :build_new_issue_from_params
+          alias_method :build_new_issue_from_params, :build_new_issue_from_params_with_trackcontrol
 
+          alias_method :update_issue_from_params_without_trackcontrol, :update_issue_from_params
+          alias_method :update_issue_from_params, :update_issue_from_params_with_trackcontrol
+        else
+          before_filter :check_tracker_id_with_trackcontrol, :only => [:new, :create, :update]
+          alias_method_chain :build_new_issue_from_params, :trackcontrol
+          alias_method_chain :update_issue_from_params, :trackcontrol
+        end
       end
     end
 

@@ -8,7 +8,13 @@ module RedmineTrackControl
         unloadable
         validate :is_valid_create_tracker, :on => :create
         validate :is_valid_show_tracker, :on => :show
-        alias_method_chain :visible?, :trackcontrol             
+
+        if Rails::VERSION::MAJOR >= 5
+          alias_method :visible_without_trackcontrol?, :visible?
+          alias_method :visible?, :visible_with_trackcontrol?
+        else
+          alias_method_chain :visible?, :trackcontrol 
+        end            
         
         # ========= start patch visible_condition =========
         unless Issue.respond_to?(:visible_condition_block)
@@ -61,7 +67,14 @@ module RedmineTrackControl
         class << self
           # use alias_method_chain to have origin methods and patched ones.
           # it will help to patch origin logic in other places (=plugins)
-          alias_method_chain :visible_condition_block, :trackcontrol
+
+          if Rails::VERSION::MAJOR >= 5
+            alias_method :visible_condition_block_without_trackcontrol, :visible_condition_block
+            alias_method :visible_condition_block, :visible_condition_block_with_trackcontrol
+          else
+            alias_method_chain :visible_condition_block, :trackcontrol
+          end       
+
         end        
 
         # ========= end patch visible_condition =========
