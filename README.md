@@ -1,6 +1,6 @@
-# Redmine Tracker Control plugin
+# Redmine Tracker Control
 
-Plugin for controlling tracker wise issue creation
+Access control for redmine trackers.
 
 ## Features
 
@@ -8,7 +8,7 @@ Plugin for controlling tracker wise issue creation
 * Role based permission to view issues
 * Project Module to enable/disable tracker permission
 * Projects without tracker control module do not follow any permission rules and will show up as usual
-* Compatible with Redmine 4.1.1 (Should also work with Redmine 3.x)
+* Compatible with Redmine 4.1.1 (Requires Rails 5.x)
 
 ## Installation
 
